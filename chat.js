@@ -22,45 +22,31 @@ var p               = PUBNUB
 ,   UUID            = ''
 ,   channel         = 'pubnub-chat-demo-channel'
 ,   users           = JSON.parse(p.db.get(channel+'-users') || '{}')
-,   anonymous       = p.$('anonymous-login')
 ,   time            = p.$('time')
 ,   online          = p.$('people-online');
 
 // --------------------------------------------------------------------------
 // 
-// TWITTER CONNECT
+// USERNAME LOGIN
 // 
 // --------------------------------------------------------------------------
-twttr.anywhere.config({
-    callbackURL: "http://pubnub.s3.amazonaws.com/rally/index.html"
-});
-twttr.anywhere(function(T){
-    p.bind(
-        'mousedown,touchstart',
-        p.$('twitter-login-button'),
-        T.signIn
-    );
+var login_input = p.$('username-input');
+var login_btn   = p.$('username-join');
 
-    function start(user) {
-        get_user({
-            uuid     : UUID = user.data('screen_name'),
-            callback : ready
-        });
-    }
-
-    T.bind( 'signOut', function (e) { location.reload(1) } );
-    T.bind( 'authComplete', function ( e, user ) { start(user) } );
-
-    if (T.isConnected()) return start(T.currentUser);
-});
-p.bind( 'click', anonymous, function() {
-    var accounts = p.attr( anonymous, 'accounts' ).split(',');
-    return get_user({
-        uuid     : UUID = accounts[Math.floor(Math.random()*accounts.length)],
+function do_login() {
+    var name = (login_input.value || '').trim().toLowerCase();
+    if (!name) return;
+    UUID = name;
+    get_user({
+        uuid     : UUID,
         callback : ready
     });
-} );
+}
 
+p.bind( 'click', login_btn, do_login );
+p.bind( 'keyup', login_input, function(e) {
+    (e.keyCode || e.charCode) === 13 && do_login();
+});
 
 // --------------------------------------------------------------------------
 // 
@@ -70,71 +56,34 @@ p.bind( 'click', anonymous, function() {
 function set_current_user(user) {
     if (user.uuid !== UUID) return;
     p.css( p.$('chat-box-user-icon'), {
-        'backgroundImage' : 'url('+user.profile_image_url+')'
+        'backgroundImage' : 'url('+user.profile_image_url_https+')'
     } );
 }
 
 // --------------------------------------------------------------------------
 // 
-// GET USER DETAILS (PICTURE, NAME, ETC)
+// GET USER - creates a user object from the username directly
 // 
 // --------------------------------------------------------------------------
 function get_user(args) {
     var uuid     = args.uuid
     ,   callback = args.callback;
 
-    if (uuid in users) return callback(users[uuid]);
-
-    function success(tuser) {
-        tuser[0].uuid = uuid;
-        users[uuid] = tuser[0];
+    if (uuid in users) {
+        // Always use GitHub avatar URL (derivable from username)
+        users[uuid].profile_image_url_https = 'https://avatars.githubusercontent.com/' + uuid + '?s=40';
         p.db.set( channel+'-users', JSON.stringify(users) );
-        callback(tuser[0]);
+        return callback(users[uuid]);
     }
 
-    function errorback() {
-        success(JSON.parse(p.$('default-user').innerHTML));
-    }
-
-    request({
-        url       : 'http://api.twitter.com/1/users/lookup.json',
-        params    : { screen_name : uuid },
-        callback  : success,
-        errorback : errorback
-    });
-}
-
-// --------------------------------------------------------------------------
-// 
-// REQUEST URL via JSONP
-// 
-// --------------------------------------------------------------------------
-function request(setup) {
-    var script    = p.create('script')
-    ,   url       = setup.url       || ''
-    ,   args      = setup.params    || {}
-    ,   callback  = setup.callback  || function(){}
-    ,   errorback = setup.errorback || function(){}
-    ,   params    = []
-    ,   unique    = 'x'+((+new Date)+'') + (++NOW);
-
-    window[unique] = function(msg) {
-        setTimeout( function() { try {
-            p.search('body')[0].removeChild(script);
-        } catch(e) { errorback() }  }, 5000 );
-        if (!msg) return errorback();
-        callback(msg);
+    var user = {
+        uuid                   : uuid,
+        name                   : uuid,
+        profile_image_url_https : 'https://avatars.githubusercontent.com/' + uuid + '?s=40'
     };
-
-    script.onerror = errorback;
-
-    args['callback'] = unique;
-    p.each( args, function( k, v ) {
-        params.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-    } );
-
-    script.src = url + '?' + params.join('&');
-    p.search('body')[0].appendChild(script);
+    users[uuid] = user;
+    p.db.set( channel+'-users', JSON.stringify(users) );
+    callback(user);
 }
 
 // --------------------------------------------------------------------------
@@ -161,7 +110,7 @@ var people = (function() {
 
     function online(user) {
         supplant( get_person_div(user.uuid), person_template, {
-            bg     : user.profile_image_url || '#555',
+            bg     : user.profile_image_url_https || '#555',
             color  : '#2e3',
             name   : user.name,
             uuid   : user.uuid,
@@ -171,7 +120,7 @@ var people = (function() {
 
     function offline(user) {
         supplant( get_person_div(user.uuid), person_template, {
-            bg     : user.profile_image_url || '#555',
+            bg     : user.profile_image_url_https || '#555',
             color  : '#e42',
             name   : user.name,
             uuid   : user.uuid,
@@ -360,16 +309,16 @@ function supplant( d, t, o ) { d.innerHTML = p.supplant( t, o ) }
 // --------------------------------------------------------------------------
 function ready(user) {
     hide('overlay');
-    hide('twitter-login');
+    hide('username-login');
 
     set_current_user(user);
 
     // Setup Connection Based on User Data
     // This will provide Connectivity References
     p = p.init({
-        publish_key   : 'demo',
-        subscribe_key : 'demo',
-        ssl           : false,
+        publish_key   : 'YOUR_PUBLISH_KEY',
+        subscribe_key : 'YOUR_SUBSCRIBE_KEY',
+        ssl           : true,
         cipher_key    : '',
         uuid          : ''+user.uuid
     });

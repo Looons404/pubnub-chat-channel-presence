@@ -2,18 +2,22 @@
 <html>
     <head>
         <meta charset=utf-8>
+        <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=2">
         <title>PubNub Channel Presence</title>
         <link rel=stylesheet href=default.css>
-        <link href=http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400|Open+Sans:400,500,700 rel=stylesheet>
+        <link href=https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400|Open+Sans:400,500,700 rel=stylesheet>
     </head>
     <body>
+        <div id=responsive-wrapper>
+        <div id=responsive-canvas>
         <div id=overlay></div>
-        <div id=twitter-login>
-            <div id=twitter-login-button></div>
-            <div
-                id=anonymous-login
-                accounts=pubnub,twitter,billgates,stephenlb
-            > - Skip - </div>
+        <div id=username-login>
+            <div id=username-login-box>
+                <h1>Join the Chat</h1>
+                <input id=username-input type=text placeholder="Enter your username" maxlength=20 autofocus>
+                <button id=username-join>Join</button>
+                <p id=username-hint>Pick any username to start chatting</p>
+            </div>
         </div>
 
         <div id=main>
@@ -109,7 +113,7 @@
                 </div></div>
             </script>
 
-            <script id=default-user>[{"id":152773076,"location":"San Francisco, CA","profile_image_url":"http://a0.twimg.com/profile_images/1378888018/pubnub-icon_normal.png","statuses_count":1999,"utc_offset":-28800,"profile_image_url_https":"https://si0.twimg.com/profile_images/1378888018/pubnub-icon_normal.png","name":"PubNub Anonymous","screen_name":"PubNub Anonymous","friends_count":5135,"listed_count":131,"description":"We provide a web-service API for businesses to build scalable Data Push communication apps on Mobile, Tablet and Web.","followers_count":19456,"url":"http://www.PubNub.com","created_at":"Sun Jun 06 21:03:46 +0000 2010","time_zone":"Pacific Time (US & Canada)","id_str":"152773076","id":233978616650817538,"favourites_count":607}]</script>
+
 
 
             <!-- PubNub Logos -->
@@ -122,12 +126,37 @@
                 <div class=pubnub-logo></div>
                 powered by
             </div>
-        </div>
+        </div> <!-- end #main -->
+        </div> <!-- end #responsive-canvas -->
+        </div> <!-- end #responsive-wrapper -->
 
-        <script src="http://platform.twitter.com/anywhere.js?id=BzYvXg6GrhgJQUHPe62vrg&v=1"></script>
+        <!-- Hidden div to configure PubNub with SSL on initial load -->
+        <div id=pubnub ssl=on style="display:none"></div>
+
         <script src=pubnub-3.2.js></script>
         <script src=animate.js></script>
         <script src=sound.js></script>
         <script src=chat.js></script>
+        <script>
+        // Responsive scaling: proportionally fit the 1024x768 canvas into the viewport
+        (function(){
+            var canvas = document.getElementById('responsive-canvas');
+            if (!canvas) return;
+
+            function scaleToFit() {
+                var w = window.innerWidth;
+                var h = window.innerHeight;
+                var scale = Math.min(w / 1024, h / 768, 1.5);
+                scale = Math.max(scale, 0.3);
+                canvas.style.transform = 'scale(' + scale + ')';
+            }
+
+            scaleToFit();
+            window.addEventListener('resize', scaleToFit);
+            window.addEventListener('orientationchange', function() {
+                setTimeout(scaleToFit, 200);
+            });
+        })();
+        </script>
     </body>
 </html>
