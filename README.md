@@ -3,7 +3,6 @@
 A real-time group chat demo powered by [PubNub](https://www.pubnub.com/) with live presence (join/leave/occupancy). Originally built by PubNub, now relaunched with a modern login flow, GitHub avatars, responsive scaling, and HTTPS support.
 
 **Try it live:** [Cloudflare Pages Demo](https://pubnub-chat-channel-presence.pages.dev)
-
 ---
 
 ## ✨ What's New
@@ -12,7 +11,6 @@ A real-time group chat demo powered by [PubNub](https://www.pubnub.com/) with li
 - **GitHub avatars** — Avatars are loaded from `avatars.githubusercontent.com` using the username.
 - **Responsive scaling** — The 1024×768 layout proportionally scales to fit any screen (desktop, tablet, phone).
 - **HTTPS everything** — All resources load over HTTPS. No more mixed-content errors.
-- **Cloudflare Pages ready** — Deploy in one click via Cloudflare Pages. Includes `_headers` for security headers.
 
 ## Features
 
@@ -58,17 +56,9 @@ npx serve .
 
 Or open `index.html` directly in a browser.
 
-### 4. Deploy to Cloudflare Pages
+### 4. Deploy
 
-1. Push this repo to GitHub.
-2. Go to [Cloudflare Dashboard → Pages](https://dash.cloudflare.com/?to=/:account/workers-and-pages/create/pages).
-3. Click **Create a project** → **Connect to Git**.
-4. Select your repo.
-5. Set **Build command** to empty (leave blank — this is a static site).
-6. Set **Build output directory** to `/` (root).
-7. Click **Deploy**.
-
-That's it — Cloudflare will auto-deploy on every push.
+Push this repo to any static hosting provider (Cloudflare Pages, Netlify, Vercel, etc.) — no build step needed.
 
 ---
 
@@ -82,7 +72,7 @@ That's it — Cloudflare will auto-deploy on every push.
 | `pubnub-3.2.js` | PubNub JavaScript SDK (v3.2, ) |
 | `animate.js` | CSS animation helpers |
 | `sound.js` | Chat notification sound |
-| `_headers` | Cloudflare Pages security headers |
+
 
 ---
 
