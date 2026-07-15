@@ -2,17 +2,17 @@
 
 A real-time group chat demo powered by [PubNub](https://www.pubnub.com/) with live presence (join/leave/occupancy). Originally built by PubNub, now relaunched with a modern login flow, GitHub avatars, responsive scaling, and HTTPS support.
 
-I CAN'T DO THIS ANYMORE, when I make it public, people find vulneranilities, when I fix them, people swear or spam. I'm done fixing this shit, you can still use it personally but I'm done with the demo
+~~I CAN'T DO THIS ANYMORE, when I make it public, people find vulneranilities, when I fix them, people swear or spam. I'm done fixing this, you can still use it personally but I'm done with the demo~~ A demo is being worked on by me
 ---
 
+
+## Features
 ## ✨ What's New
 
 - **Username login** — No more Twitter authentication. Just type a name and join.
 - **GitHub avatars** — Avatars are loaded from `avatars.githubusercontent.com` using the username.
 - **Responsive scaling** — The 1024×768 layout proportionally scales to fit any screen (desktop, tablet, phone).
 - **HTTPS everything** — All resources load over HTTPS. No more mixed-content errors.
-
-## Features
 
 - Real-time group chat via PubNub
 - Live presence — see who's online/offline
