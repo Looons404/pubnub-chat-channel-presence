@@ -112,9 +112,9 @@ var people = (function() {
         supplant( get_person_div(user.uuid), person_template, {
             bg     : user.profile_image_url_https || '#555',
             color  : '#2e3',
-            name   : user.name,
-            uuid   : user.uuid,
-            status : 'online'
+            name   : clean(user.name),
+            uuid   : clean(user.uuid),
+            status : clean('online')
         } );
     }
 
@@ -122,9 +122,9 @@ var people = (function() {
         supplant( get_person_div(user.uuid), person_template, {
             bg     : user.profile_image_url_https || '#555',
             color  : '#e42',
-            name   : user.name,
-            uuid   : user.uuid,
-            status : 'offline'
+            name   : clean(user.name),
+            uuid   : clean(user.uuid),
+            status : clean('offline')
         } );
     }
 
@@ -167,9 +167,9 @@ var update = (function() {
                 uuid     : args.uuid,
                 callback : function(user) {
                     supplant( entry, update_template, {
-                        time    : time.innerHTML,
-                        name    : user.name,
-                        message : msg
+                        time    : clean(time.innerHTML),
+                        name    : clean(user.name),
+                        message : clean(msg)
                     } );
 
                     update_area.insertBefore(
@@ -205,10 +205,10 @@ var talk = (function() {
         var entry = p.create('div');
 
         supplant( entry, chat_template, {
-            name    : user.name,
-            time    : when || time.innerHTML,
-            clock   : clock,
-            message : message
+            name    : clean(user.name),
+            time    : clean(when || time.innerHTML),
+            clock   : clean(clock),
+            message : clean(message)
         } );
 
         p.css( entry, { overflow: 'hidden' } );
@@ -267,7 +267,9 @@ var talk = (function() {
 // 
 // --------------------------------------------------------------------------
 function first_div(elm) { return elm.getElementsByTagName('div')[0] }
-function clean(text)    { return (''+text).replace( /[<>]/g, '' ) }
+function clean(text)    { return (''+text).replace(/[<>"']/g, function(ch) {
+    return {'<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[ch];
+}) }
 function template(id)   { return p.$(id).innerHTML }
 function zeropad(num)   { return (''+num).length > 1 ? ''+num : '0'+num }
 function hide(id)       { p.css( p.$(id), { display : 'none' } ) }
