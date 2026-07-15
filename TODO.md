@@ -7,7 +7,7 @@
 - [ ] Add moderation of bad words
 - [ ] Scrollable chat and people list
 - [ ] Add responsiveness
-- [ ] Add rate-limiting if possible
+- [ ] Add a cooldown
 - [ ] Add GitHub login
 - [ ] Add a character limit of like 1000 characters
 - [ ] Add a option to stop the sound effect to play
