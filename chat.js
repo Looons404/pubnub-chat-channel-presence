@@ -36,6 +36,13 @@ var login_btn   = p.$('username-join');
 function do_login() {
     var name = (login_input.value || '').trim().toLowerCase();
     if (!name) return;
+
+    // Allow only letters, numbers, hyphens and underscores; max 20 chars
+    if (!/^[a-z0-9_-]{1,20}$/.test(name)) {
+        showChatHint('Username must be 1-20 characters: letters, numbers, - or _');
+        return;
+    }
+
     UUID = name;
     get_user({
         uuid     : UUID,
@@ -267,9 +274,102 @@ var talk = (function() {
 // 
 // --------------------------------------------------------------------------
 function first_div(elm) { return elm.getElementsByTagName('div')[0] }
+function showChatHint(text) {
+    var hint = p.$('username-hint');
+    if (!hint) return;
+    hint.innerHTML = clean(text);
+    hint.style.color = '#e42';
+    setTimeout(function() {
+        hint.style.color = '';
+        hint.innerHTML = 'Pick any username to start chatting';
+    }, 3000);
+}
+function showChatError(text) {
+    var input = p.$('chat-input');
+    if (!input) return;
+    var originalPlaceholder = input.placeholder;
+    input.placeholder = text;
+    input.className = input.className + ' chat-input-error';
+    setTimeout(function() {
+        input.placeholder = originalPlaceholder;
+        input.className = input.className.replace(' chat-input-error', '');
+    }, 3000);
+}
 function clean(text)    { return (''+text).replace(/[<>"']/g, function(ch) {
     return {'<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[ch];
 }) }
+
+// --------------------------------------------------------------------------
+//
+// MODERATION HELPERS (client-side fallback)
+//
+// --------------------------------------------------------------------------
+var moderation = (function() {
+    var lastMessageTime = 0;
+
+    // Basic list of words to mask. The client will try to load an online list.
+    var badWords = ['badword', 'curse', 'profanity', 'spam', 'annoying'];
+
+    // Try to load the online profanity list (raw.githubusercontent.com is CORS-enabled).
+    (function loadOnlineList() {
+        if (typeof fetch === 'undefined') return;
+        fetch('https://raw.githubusercontent.com/LDNOOBW/List-of-Dirty-Naughty-Obscene-and-Otherwise-Bad-Words/master/en')
+            .then(function(resp) { return resp.text(); })
+            .then(function(text) {
+                badWords = text.split(/\r?\n/).map(function(line) {
+                    return line.trim().toLowerCase();
+                }).filter(function(word) {
+                    return word.length > 0;
+                });
+            })
+            .catch(function(err) {
+                console.warn('Could not load online profanity list, using fallback.', err);
+            });
+    })();
+
+    function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function badWordPattern(word) {
+        if (word.indexOf(' ') !== -1) {
+            return escapeRegExp(word);
+        }
+        return '\\b' + escapeRegExp(word) + '\\b';
+    }
+
+    function maskProfanity(text) {
+        var masked = '' + text;
+        badWords.forEach(function(word) {
+            var re = new RegExp('(' + badWordPattern(word) + ')', 'gi');
+            masked = masked.replace(re, function(match) {
+                var stars = '';
+                for (var i = 0; i < match.length; i++) stars += '*';
+                return stars;
+            });
+        });
+        return masked;
+    }
+
+    return {
+        cooldownSeconds: 2,
+        maxLength: 1000,
+
+        checkRateLimit: function() {
+            var now = +new Date();
+            if ((now - lastMessageTime) < moderation.cooldownSeconds * 1000) {
+                return false;
+            }
+            lastMessageTime = now;
+            return true;
+        },
+
+        filterMessage: function(text) {
+            return maskProfanity(text);
+        }
+    };
+})();
+
 function template(id)   { return p.$(id).innerHTML }
 function zeropad(num)   { return (''+num).length > 1 ? ''+num : '0'+num }
 function hide(id)       { p.css( p.$(id), { display : 'none' } ) }
@@ -286,11 +386,25 @@ function supplant( d, t, o ) { d.innerHTML = p.supplant( t, o ) }
 
     function send() {
         if (!input.value || !UUID) return;
+
+        // Client-side rate limit fallback
+        if (!moderation.checkRateLimit()) {
+            showChatError('Please wait a moment before sending another message.');
+            return;
+        }
+
+        // Client-side profanity fallback
+        var filtered = moderation.filterMessage(input.value);
+        if (filtered.length > moderation.maxLength) {
+            showChatError('Message is too long.');
+            return;
+        }
+
         return p.publish({
             channel : channel,
             message : {
                 uuid  : UUID,
-                body  : clean(input.value),
+                body  : clean(filtered),
                 time  : time.innerHTML,
                 clock : nowc()
             },
@@ -318,8 +432,8 @@ function ready(user) {
     // Setup Connection Based on User Data
     // This will provide Connectivity References
     p = p.init({
-        publish_key   : 'YOUR_PUBLISH_KEY',
-        subscribe_key : 'YOUR_SUBSCRIBE_KEY',
+        publish_key   : KEYS.publish_key,
+        subscribe_key : KEYS.subscribe_key,
         ssl           : true,
         cipher_key    : '',
         uuid          : ''+user.uuid
