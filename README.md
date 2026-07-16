@@ -2,7 +2,7 @@
 
 A real-time group chat demo powered by [PubNub](https://www.pubnub.com/) with live presence (join/leave/occupancy). Originally built by PubNub, now relaunched with a modern login flow, GitHub avatars, responsive scaling, and HTTPS support.
 
-~~I CAN'T DO THIS ANYMORE, when I make it public, people find vulneranilities, when I fix them, people swear or spam. I'm done fixing this, you can still use it personally but I'm done with the demo~~ A demo is being worked on by me
+~~I CAN'T DO THIS ANYMORE, when I make it public, people find vulneranilities, when I fix them, people swear or spam. I'm done fixing this, you can still use it personally but I'm done with the demo~~ A demo is being worked on by @HackerTyper2311 (quickfix)
 ---
 
 
