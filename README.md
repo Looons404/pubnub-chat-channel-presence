@@ -31,19 +31,22 @@ cd pubnub-chat-channel-presence
 
 ### 2. Add your PubNub keys
 
-Open **`chat.js`** and add your publish and subscribe keys to the `ready()` function:
+Copy the example keys file and add your own publish/subscribe keys:
 
-```javascript
-p = p.init({
-    publish_key   : 'YOUR_PUBLISH_KEY',
-    subscribe_key : 'YOUR_SUBSCRIBE_KEY',
-    ssl           : true,
-    cipher_key    : '',
-    uuid          : ''+user.uuid
-});
+```bash
+cp keys.example.js keys.js
 ```
 
-Get free API keys at [PubNub Dashboard](https://admin.pubnub.com/).
+Then edit `keys.js` with your keys from the [PubNub Dashboard](https://admin.pubnub.com/):
+
+```javascript
+const KEYS = {
+    publish_key   : 'YOUR_PUBLISH_KEY',
+    subscribe_key : 'YOUR_SUBSCRIBE_KEY'
+};
+```
+
+**Security note:** `keys.js` is listed in `.gitignore` and will not be pushed to GitHub. However, because this is a client-side demo, the keys are still visible in the browser to anyone using the app. For a public deployment, enable [PubNub Access Manager (PAM)](https://www.pubnub.com/docs/general/security/access-manager) to restrict access.
 
 ### 3. Open locally
 
@@ -71,7 +74,18 @@ Push this repo to any static hosting provider (Cloudflare Pages, Netlify, Vercel
 | `pubnub-3.2.js` | PubNub JavaScript SDK (v3.2, ) |
 | `animate.js` | CSS animation helpers |
 | `sound.js` | Chat notification sound |
+| `server/pubnub-function.js` | PubNub Function for server-side anti-flood and profanity filtering |
 
+
+### Server-side moderation
+
+This demo now includes a PubNub Function (`server/pubnub-function.js`) that intercepts every publish event on PubNub's edge network to enforce:
+
+- **Anti-flood:** one message per user every 2 seconds
+- **Profanity filter:** masks or blocks configurable bad words
+- **Message length limit:** 1000 characters
+
+See [`server/README.md`](server/README.md) for setup instructions.
 
 ---
 

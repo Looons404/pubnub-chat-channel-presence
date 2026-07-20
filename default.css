@@ -363,6 +363,10 @@ body {
     font-size: 18px;
     color: #fefef2;
 }
+.chat-input-error {
+    color: #ff9999 !important;
+    text-shadow: 0 0 4px #e42 !important;
+}
 .chat-box-button {
     cursor: pointer;
     outline: 0;
