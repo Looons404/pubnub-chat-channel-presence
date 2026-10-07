@@ -414,7 +414,7 @@ function update_time() {
     ,   min = now.getMinutes()
     ,   hrs = now.getHours();
 
-    supplant( time, '{hours}:{minutes}<sup>{pmam}</sup>', {
+    supplant( time, '{hours}:{minutes}{pmam}', {
         hours   : zeropad(hrs > 12 ? (hrs - 12) || 1 : hrs || 1),
         minutes : zeropad(min),
         pmam    : hrs > 11 ? 'pm' : 'am'
